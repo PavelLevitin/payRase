@@ -1,70 +1,64 @@
-import React,{Component} from 'react';
-import Modal from 'react-awesome-modal';
+import React, { useState } from 'react';
 import './buttons.styles.css';
 
+const BUTTON_W = 170;
+const BUTTON_H = 52;
+const GAP = 50;
+
+const centerPos = () => ({
+    top: (window.innerHeight / 2 - BUTTON_H / 2).toFixed() + 'px',
+    left: (window.innerWidth / 2 + GAP / 2).toFixed() + 'px'
+});
+
+const staticPos = () => ({
+    top: (window.innerHeight / 2 - BUTTON_H / 2).toFixed() + 'px',
+    left: (window.innerWidth / 2 - BUTTON_W - GAP / 2).toFixed() + 'px'
+});
 
 const getRandomPoint = () => {
-    let x = (Math.random() * (window.innerWidth/2 )).toFixed()
-    let y = (Math.random() * (window.innerHeight/4)).toFixed()
+    const range = 0.3;
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    const x = cx + (Math.random() - 0.5) * 2 * (window.innerWidth * range);
+    const y = cy + (Math.random() - 0.5) * 2 * (window.innerHeight * range);
+    const minX = cx - window.innerWidth * range;
+    const maxX = cx + window.innerWidth * range - BUTTON_W;
+    const minY = cy - window.innerHeight * range;
+    const maxY = cy + window.innerHeight * range - BUTTON_H;
     return {
-      top: y + 'px',
-      left: x + 'px'
-    }
-}
+        top: Math.min(Math.max(y, minY), maxY).toFixed() + 'px',
+        left: Math.min(Math.max(x, minX), maxX).toFixed() + 'px'
+    };
+};
 
+function TwoButtons() {
+    const [prankStyles, setPrankStyles] = useState(centerPos);
+    const [isOpen, setIsOpen] = useState(false);
 
-class TwoButtons extends Component {
- constructor(){
-  super();
-
-  this.state={
-    styles:{
-            top: '0px',
-            left: '0px'
-           },
-    isOpen:false       
-  }
- }
- openModal() {
-    this.setState({
-        isOpen : true
-    });
-  }   
-  closeModal() {
-    this.setState({
-        isOpen : false
-    });
-  }  
-  
- // ()=>{this.setState({styles:getRandomPoint()})
-render (){
-     return (
-         <div className="buttons-container">
-            
-          <div className="prank" style={this.state.styles} onMouseOver={()=>
-            {this.setState({styles:getRandomPoint()});}}>
+    return (
+        <div className="buttons-container">
+            <div className="jump-boundary" />
+            <div className="static" style={{ ...staticPos(), position: 'fixed' }} onClick={() => setIsOpen(true)}>
+                <span>No Thank you</span>
+            </div>
+            <div className="prank" style={{ ...prankStyles, position: 'fixed' }} onMouseOver={() => setPrankStyles(getRandomPoint())}>
                 <span>Yes Sure</span>
-          </div>
-          <div className="static" onClick={() => {this.openModal()}}>
-            <span>No Thank you</span>
-          </div>
-          <section>
-                <Modal visible={this.state.isOpen} width="600" height="300" effect="fadeInUp" onClickAway={() => this.closeModal()}>
-                    <div className="wraper">
-                        <button  onClick={() => this.closeModal()}>X</button>
-                        <div className="model-heading">
-                           <h1>Thank you</h1>
+            </div>
+            {isOpen && (
+                <div className="modal-overlay" onClick={() => setIsOpen(false)}>
+                    <div className="modal-box" onClick={e => e.stopPropagation()}>
+                        <button className="modal-close" onClick={() => setIsOpen(false)}>X</button>
+                        <div className="modal-heading">
+                            <h1>Thank you</h1>
                         </div>
-                        <div className="model-contant">
-                           <h3>We very much appreciate your decision</h3>
+                        <div className="modal-content">
+                            <h3>We very much appreciate your decision</h3>
                         </div>
-                       
                     </div>
-                </Modal>
-            </section>
+                </div>
+            )}
         </div>
-     )
- }
+    );
 }
 
 export default TwoButtons;
